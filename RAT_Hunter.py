@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Aug 22 17:25:19 2019
-
 @author: lguliano
 """
+import datetime
+import os
+
+#Script that scans the RAT_List.txt file created by Run_SWEAP_Data_Calc.csh
+#Determines dates of orbits based on the contents of the OAF files
+
+#Set where on Laz/Lin machine at CfA the data files are being checked for size
+Data_Path = '/psp/data/moc_data_products/ssr_telemetry/'
 
 def RAT_Hunter(RAT_list):
     #search for all encounter labels in seperated text output
@@ -41,7 +47,8 @@ def RAT_Hunter(RAT_list):
        Start_Date = int(Encounter_Start_File.split(':')[2].split(' ')[0])
        Starts = [Start_Year, Start_Date]
        Start_List.append(Starts)
-
+	
+	   #Write results to RAT_List.txt
        with  open('RAT_List.txt','a') as RAT_file:
            RAT_file.write(Orbit_List[i].strip()+'\n')
            RAT_file.write(Encounter_Start_File.strip()+'\n')
@@ -50,9 +57,29 @@ def RAT_Hunter(RAT_list):
     for i in range(len(Start_List)-1):
         data_entry = Orbit_List[i],Start_List[i][0],Start_List[i][1],Start_List[i+1][0],Start_List[i+1][1]
         Date_List.append(data_entry)
-    #the last orbit wont have a set end yet, so set to a huge number  
-    data_entry= Orbit_List[-1],Start_List[-1][0],Start_List[-1][1], '999', '999'   
-    Date_List.append(data_entry)
+
+#the last orbit wont have a set end yet, so set to THE MOST RECENT DATA FILE OR TODAYS DATA
+    #Whichever is eariler
+    DOY_today = datetime.datetime.now().timetuple().tm_yday
+    year_today = datetime.datetime.now().year
+    next_year = year_today + 1
+    
+    #If there is already data from the next year, use the DOY today for the cutoff 
+    year_data_folders = os.listdir(Data_Path)
+    if next_year in year_data_folders:
+        end_DOY = DOY_today
+        
+    #If no new year yet, Determine if DOY today or most recent data file is the more recent date   
+    else:
+        date_folders = os.listdir(Data_Path+str(year_today))
+        last_update = int(date_folders[-1])
+        if DOY_today <= last_update:
+            end_DOY = DOY_today
+        else:
+            end_DOY = last_update
+            
+    data_entry= Orbit_List[-1],Start_List[-1][0],Start_List[-1][1], year_today, end_DOY   
+    Date_List.append(data_entry)        
     
     print(Date_List)
     return Date_List
@@ -60,4 +87,5 @@ def RAT_Hunter(RAT_list):
 if __name__ == "__main__":
     #Get results of serach for RAT uploads from text file saving results
     RAT_List = open('RAT_List.txt', 'r').read()
+    RAT_List = RAT_List.upper()
     RAT_Hunter(RAT_List)

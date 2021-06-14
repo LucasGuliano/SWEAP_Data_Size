@@ -1,0 +1,49 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf600
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 Helvetica-Bold;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww14260\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs36 \cf0 ***** SET UP and RUNNING ****
+\fs24 \
+\
+*Copy SWEAP_Data_Calc folder onto the Laz machine at CfA\
+*In terminal at directory, run \'91chmod +x Run_SWEAP_Data_Calc.csh\'92 to make it executable from CL\
+*At CL, run \'91./Run_SWEAP_Data_Calc.csh\'92\
+\
+
+\fs36 ***** Description *****\
+\
+
+\f1\b\fs24 **All data is in units of GigaBits*
+\f0\b0  \
+\
+These scripts are used to calculate the total data from SWEAP on Parker Solar Probe\
+\
+
+\f1\b Run_SWEAP_Data_Calc.csh:
+\f0\b0 \
+C-shell wrapper to run the program.\
+Searches the location on Laz for the OAF files (\'91/psp/data/moc_data_products/orbit_activity_file/\'91)\
+Writes these files to text file so that RAT_Hunter.py can determine the orbit dates\
+Writes output of RAT_Hunter.py to text file Dates_of_Orbits.txt\
+Calls SWEAP_Data_Size.py to do the Data Size calculations and documentation in the CSV file\
+\
+
+\f1\b RAT_Hunter.py:
+\f0\b0 \
+Python script that reads the text file created from the OAF files to determine the dates of the orbits\
+Returns the orbit dates to the written to text file Dates_of_Orbits.txt\
+\
+
+\f1\b SWEAP_Data_Size.py:
+\f0\b0 \
+Python script that is the workhorse of this package\
+Reads from Dates_of_Orbits.txt to get orbit dates\
+Finds the data allocation file for each orbit at '/psp/data/teams/psp_soc/orbit_'\
+Calculates the data size for each orbit by searching for EA files in /psp/data/moc_data_products/ssr_telemetry\
+Gets total for each orbit as well as breaks it down by priority \
+Prints out dates of Orbits, total data used, data allocated, and percentage used\
+Records all data to SWEAP_Data_Usage.csv\
+}
